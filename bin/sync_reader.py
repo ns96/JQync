@@ -9,25 +9,6 @@ import pywinusb.hid as hid
 
 def readData(payload):
     print(payload)
-
-    # Parse the x-coordinate
-    #mX = payload[1] & 0xFF;
-    #mX += (payload[2] & 0xFF) << 8;
-
-    # Parse the y-coordinate.
-    #mY = payload[3] & 0xFF;
-    #mY += (payload[4] & 0xFF) << 8;
-
-    # Parse the pressure.
-    #mPressure = payload[5] & 0xFF;
-    #mPressure += (payload[6] & 0xFF) << 8;
-
-    #if(mPressure >= 300):
-    #    print(payload)
-    #    print('mX: ', mX)
-    #    print('mY: ', mY)
-    #    print('Pressure: ', mPressure)
-
     return None
 
 def click_signal(target_usage, target_vendor_id):
