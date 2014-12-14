@@ -2,8 +2,6 @@ package com.instras.utils;
 
 import com.instras.model.VirtualButton;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,6 +54,9 @@ public class FileUtil {
         for(String line: getLines(filename)) {
             String[] sa = line.split("\\s*,\\s*");
             
+            // make sure we have button data 
+            if(sa.length != 4) continue;
+            
             try {
                 int number = Integer.parseInt(sa[0]);
                 int xCoordinate = Integer.parseInt(sa[1]);
@@ -64,7 +65,7 @@ public class FileUtil {
                 
                 VirtualButton virtualButton = new VirtualButton(number, xCoordinate, yCoordinate, value);
                 buttonList.add(virtualButton);
-            } catch(Exception e) {}
+            } catch(NumberFormatException e) {}
         }
         
         return buttonList;

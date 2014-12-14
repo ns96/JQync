@@ -10,15 +10,13 @@ import com.instras.sync.SyncReaderThread;
 import com.instras.utils.FileUtil;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.imageio.ImageIO;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -27,12 +25,13 @@ import net.objecthunter.exp4j.ExpressionBuilder;
  * @author nathan
  */
 public class JQync {
-
+    private JQyncFrame frame;
+    
     private final int SCALING = 5;
     private final int MAX_X = 20280 / SCALING;
     private final int MAX_Y = 13942 / SCALING;
-    private final int INPUT_REGION_X = 14000;
-    private final int BUTTON_RADIUS = 500;
+    private final int INPUT_REGION_X = 14900;
+    private final int BUTTON_RADIUS = 400;
 
     // stores the x,y, pressure data from the sync device
     private ArrayList<Integer[]> syncData = new ArrayList<>();
@@ -80,6 +79,11 @@ public class JQync {
         Thread thread = new Thread(syncReaderThread);
         thread.start();
     }
+    
+    public void displayFrame() {
+        frame = new JQyncFrame();
+        frame.setVisible(true);
+    }
 
     /**
      * This stores the data which comes from the sync device and divide by 10,
@@ -126,7 +130,7 @@ public class JQync {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setStroke(new BasicStroke(5f));
+        g2.setStroke(new BasicStroke(8f));
         g2.setColor(Color.RED);
 
         // now draw lines between the points
@@ -140,7 +144,13 @@ public class JQync {
                 g2.drawLine(pdata[0], pdata[1], data[0], data[1]);
             }
         }
-
+        
+        int textX = INPUT_REGION_X/SCALING + 10;
+        Font font = new Font("Arial Black", Font.PLAIN, 60);
+        g2.setFont(font);
+        g2.drawString("TEST", textX, 100);
+        g2.drawString("TEST2", textX, 200);
+        
         saveImage(bufferedImage);
     }
 
@@ -189,12 +199,13 @@ public class JQync {
      * @param bufferedImage
      */
     private void saveImage(BufferedImage bufferedImage) {
-        try {
+        frame.displayImage(bufferedImage, MAX_X, MAX_Y);
+        /*try {
             File outputfile = new File("/Users/nathan/temp/syncData.png");
             ImageIO.write(bufferedImage, "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /**
@@ -224,7 +235,7 @@ public class JQync {
             // now get the button what was pressed
             for(VirtualButton virtualButton: buttonList) {
                 if(virtualButtonPressed(virtualButton, operatorXY[0], operatorXY[1])) {
-                    System.out.println("Button: " + virtualButton);
+                    //System.out.println("Button: " + virtualButton);
                     
                     String value = virtualButton.getValue();
                     
@@ -240,13 +251,20 @@ public class JQync {
                     } else if(value.equals("Up")) {
                         
                     } else if(value.equals("Down")) {
+                        
+                    } else if(value.equals("Save")) {
                         setSaveButtonPressed();
-                    } else if(value.equals("Clear")) {
+                    }  else if(value.equals("Clear")) {
                         expressionBuffer = new StringBuffer();
                         result = null;
+                    } else if(value.equals("?")) {
+                        
                     } else {
                         expressionBuffer.append(value);
                     }
+                    
+                    frame.displayExpression(expressionBuffer.toString());
+                    
                     break;
                 }
             }
@@ -264,12 +282,17 @@ public class JQync {
                 expression = result.toString() + expression;
             }
             
-            Expression eb = new ExpressionBuilder(expression).build();
-            result  = eb.evaluate();
+            if(!expression.isEmpty()) {
+                Expression eb = new ExpressionBuilder(expression).build();
+                result  = eb.evaluate();
             
-            // now clear out the expression buffer
-            expressionBuffer = new StringBuffer();
-            System.out.println("Expression: " + expression + " = " + result);
+                // now clear out the expression buffer
+                expressionBuffer = new StringBuffer();
+                
+                String displayResult = expression + " = " + result;
+                frame.displayResult(displayResult);
+                //System.out.println("Expression: " + result);
+            }
         }
     }
 
@@ -288,5 +311,6 @@ public class JQync {
         JQync jQync = new JQync();
         jQync.setButtonList(buttonList);
         jQync.connect(cmd);
+        jQync.displayFrame();
     }
 }
